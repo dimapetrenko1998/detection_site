@@ -3,15 +3,12 @@ import numpy as np
 from django.core.files.base import ContentFile
 from .models import ImageFeed, DetectedObject
 
-
 VOC_LABELS = [
     "background", "aeroplane", "bicycle", "bird", "boat", "bottle",
     "bus", "car", "cat", "chair", "cow", "diningtable",
     "dog", "horse", "motorbike", "person", "pottedplant",
     "sheep", "sofa", "train", "tvmonitor"
 ]
-
-
 
 
 def process_image(image_feed_id):
@@ -43,7 +40,7 @@ def process_image(image_feed_id):
                 (startX, startY, endX, endY) = box.astype("int")
                 cv2.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
                 label = f"{class_label}: {confidence:.2f}"
-                cv2.putText(img, label, (startX+5, startY + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(img, label, (startX + 5, startY + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
                 DetectedObject.objects.create(
                     image_feed=image_feed,

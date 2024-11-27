@@ -1,7 +1,5 @@
 from django.urls import path
-
 from .views import home, register, user_login, user_logout, dashboard, process_image_feed, add_image_feed, delete_image
-
 from django.conf import settings
 from django.conf.urls.static import static
 app_name = 'object_detection'

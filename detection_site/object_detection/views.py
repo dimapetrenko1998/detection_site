@@ -67,7 +67,6 @@ def add_image_feed(request):
         form = ImageFeedForm()
     return render(request, 'object_detection/add_image_feed.html', {'form': form})
 
-
 @login_required
 def delete_image(request, image_id):
     image = get_object_or_404(ImageFeed, id=image_id, user=request.user)  # Ensuring only the owner can delete
