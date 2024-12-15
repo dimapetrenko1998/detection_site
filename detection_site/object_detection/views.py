@@ -2,9 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .models import ImageFeed
+from .models import ImageFeed, UploadedImage
+from .object_detection import detect_objects_with_mobilenet, detect_objects_with_yolo
 from .utils import process_image
-from .forms import ImageFeedForm
+from .forms import ImageFeedForm, ImageUploadForm
 
 
 def home(request):
@@ -43,9 +44,30 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    image_feeds = ImageFeed.objects.filter(user=request.user)
-    return render(request, 'object_detection/dashboard.html', {'image_feeds': image_feeds})
+    """
+    Представление для дашборда, позволяющее пользователю загружать изображения и выбирать модель для распознавания объектов.
 
+    Args:
+        request (HttpRequest): Объект запроса.
+
+    Returns:
+        HttpResponse: Объект ответа с дашбордом и формой загрузки изображения.
+    """
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            image = form.save(commit=False)
+            if image.model_choice == 'mobilenet':
+                results = detect_objects_with_mobilenet(image.image.path)
+            elif image.model_choice == 'yolo':
+                results = detect_objects_with_yolo(image.image.path)
+            image.detection_results = results
+            image.save()
+            return redirect('dashboard')
+    else:
+        form = ImageUploadForm()
+    images = UploadedImage.objects.filter(user=request.user)
+    return render(request, 'object_detection/add_image_feed.html', {'form': form})
 
 @login_required
 def process_image_feed(request, feed_id):
@@ -67,8 +89,37 @@ def add_image_feed(request):
         form = ImageFeedForm()
     return render(request, 'object_detection/add_image_feed.html', {'form': form})
 
+
 @login_required
 def delete_image(request, image_id):
     image = get_object_or_404(ImageFeed, id=image_id, user=request.user)  # Ensuring only the owner can delete
     image.delete()
     return redirect('object_detection:dashboard')
+
+
+@login_required
+def dashboard(request):
+    """
+    Представление для дашборда, позволяющее пользователю загружать изображения и выбирать модель для распознавания объектов.
+
+    Args:
+        request (HttpRequest): Объект запроса.
+
+    Returns:
+        HttpResponse: Объект ответа с дашбордом и формой загрузки изображения.
+    """
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            image = form.save(commit=False)
+            if image.model_choice == 'mobilenet':
+                results = detect_objects_with_mobilenet(image.image.path)
+            elif image.model_choice == 'yolo':
+                results = detect_objects_with_yolo(image.image.path)
+            image.detection_results = results
+            image.save()
+            return redirect('dashboard')
+    else:
+        form = ImageUploadForm()
+    images = UploadedImage.objects.filter(user=request.user)
+    return render(request, 'object_detection/add_image_feed.html', {'form': form})

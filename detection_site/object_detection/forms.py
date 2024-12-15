@@ -1,5 +1,5 @@
 from django import forms
-from .models import ImageFeed
+from .models import ImageFeed, UploadedImage
 
 
 class ImageFeedForm(forms.ModelForm):
@@ -12,3 +12,9 @@ class ImageFeedForm(forms.ModelForm):
         help_texts = {
             'image': 'Upload an image file.',
         }
+
+
+class ImageUploadForm(forms.ModelForm):
+    class Meta:
+        model = UploadedImage
+        fields = ['image', 'model_choice']

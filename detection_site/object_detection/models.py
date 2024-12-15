@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 
@@ -19,3 +20,14 @@ class DetectedObject(models.Model):
 
     def __str__(self):
         return f"{self.object_type} ({self.confidence * 100}%) on {self.image_feed.image.name}"
+
+
+class UploadedImage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='uploaded_images/')
+    detection_results = models.JSONField(blank=True, null=True)
+    model_choice = models.CharField(max_length=50, choices=[('mobilenet', 'MobileNet SSD'), ('yolo', 'YOLOv3')],
+                                    default='mobilenet')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.image.name}"
